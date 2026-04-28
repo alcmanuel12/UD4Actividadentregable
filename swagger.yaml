@@ -1,104 +1,192 @@
 openapi: 3.0.0
 info:
   title: API Actividad Joyería DB
-  description: API para la gestión del inventario de joyas y clientes.
+  description: API para la gestión del inventario de joyas, relojes y colecciones.
   version: 1.0.0
 servers:
   - url: http://localhost:3000/api
     description: Servidor de desarrollo
 
+tags:
+  - name: Colecciones
+    description: Operaciones CRUD sobre el modelo Coleccion
+
 paths:
-  /joyas:
+  /colecciones:
     get:
-      summary: Obtener todas las joyas
+      summary: Obtener todas las colecciones
       tags:
-        - Joyas
+        - Colecciones
       responses:
         '200':
-          description: Lista de joyas obtenida con éxito
+          description: Lista de colecciones obtenida con éxito
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Joya'
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 3
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Coleccion'
+
     post:
-      summary: Crear una nueva joya
+      summary: Crear una nueva colección
       tags:
-        - Joyas
+        - Colecciones
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/JoyaInput'
+              $ref: '#/components/schemas/ColeccionInput'
+            example:
+              nombre: Primavera 2026
+              temporada: Primavera
+              activa: true
       responses:
         '201':
-          description: Joya creada exitosamente
-        '400':
-          description: Error de validación de los datos
-
-  /joyas/{id}:
-    get:
-      summary: Obtener una joya por ID
-      tags:
-        - Joyas
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: string
-          required: true
-          description: El ID de la joya
-      responses:
-        '200':
-          description: Detalles de la joya
+          description: Colección creada exitosamente
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Joya'
-        '404':
-          description: Joya no encontrada
-    put:
-      summary: Actualizar una joya existente
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Coleccion'
+        '400':
+          description: Error de validación de los datos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /colecciones/{id}:
+    get:
+      summary: Obtener una colección por ID
       tags:
-        - Joyas
+        - Colecciones
       parameters:
         - in: path
           name: id
+          required: true
           schema:
             type: string
+            example: 60d21b4667d0d8992e610c85
+          description: ObjectId de MongoDB de la colección
+      responses:
+        '200':
+          description: Detalles de la colección
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Coleccion'
+        '404':
+          description: Colección no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Actualizar una colección existente
+      tags:
+        - Colecciones
+      parameters:
+        - in: path
+          name: id
           required: true
+          schema:
+            type: string
+            example: 60d21b4667d0d8992e610c85
+          description: ObjectId de MongoDB de la colección
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/JoyaInput'
+              $ref: '#/components/schemas/ColeccionInput'
+            example:
+              nombre: Verano Eterno
+              temporada: Verano
+              activa: false
       responses:
         '200':
-          description: Joya actualizada
+          description: Colección actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Coleccion'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
-          description: Joya no encontrada
+          description: Colección no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     delete:
-      summary: Eliminar una joya
+      summary: Eliminar una colección
       tags:
-        - Joyas
+        - Colecciones
       parameters:
         - in: path
           name: id
+          required: true
           schema:
             type: string
-          required: true
+            example: 60d21b4667d0d8992e610c85
+          description: ObjectId de MongoDB de la colección
       responses:
         '200':
-          description: Joya eliminada exitosamente
+          description: Colección eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Colección eliminada correctamente
         '404':
-          description: Joya no encontrada
+          description: Colección no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
-    Joya:
+    Coleccion:
       type: object
       properties:
         _id:
@@ -106,34 +194,47 @@ components:
           example: 60d21b4667d0d8992e610c85
         nombre:
           type: string
-          example: Anillo de Compromiso
-        material:
+          minLength: 3
+          example: Verano Eterno
+        temporada:
           type: string
-          enum: [Oro, Plata, Diamante]
-          example: Oro
-        precio:
-          type: number
-          example: 1200.50
-        stock:
-          type: integer
-          example: 5
-    JoyaInput:
+          enum: [Primavera, Verano, Otoño, Invierno, Atemporal]
+          example: Verano
+        fechaLanzamiento:
+          type: string
+          format: date-time
+          example: 2025-06-01T00:00:00.000Z
+        activa:
+          type: boolean
+          example: true
+
+    ColeccionInput:
       type: object
       required:
         - nombre
-        - material
-        - precio
       properties:
         nombre:
           type: string
-          example: Collar de Perlas
-        material:
+          minLength: 3
+          example: Primavera 2026
+        temporada:
           type: string
-          enum: [Oro, Plata, Diamante]
-          example: Plata
-        precio:
-          type: number
-          example: 250
-        stock:
-          type: integer
-          example: 10
+          enum: [Primavera, Verano, Otoño, Invierno, Atemporal]
+          example: Primavera
+        fechaLanzamiento:
+          type: string
+          format: date
+          example: 2026-03-01
+        activa:
+          type: boolean
+          example: true
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Error de validación de los datos
