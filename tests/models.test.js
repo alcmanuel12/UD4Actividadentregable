@@ -5,7 +5,8 @@ const Reloj = require('../models/Reloj');
 describe('Pruebas de Modelos de la Joyería', () => {
 
     beforeAll(async () => {
-        await mongoose.connect('mongodb://127.0.0.1:27017/joyeria_test_db');
+        const uri = process.env.MONGODB_TEST_URI || 'mongodb://127.0.0.1:27017/joyeria_test_db';
+        await mongoose.connect(uri);
     });
 
     afterAll(async () => {
